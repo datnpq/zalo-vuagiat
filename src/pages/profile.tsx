@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { Box, Page, Text, Button, Icon, List, Avatar, Modal, Sheet } from 'zmp-ui';
 import { userAtom, activeReservationsAtom, interestedMachinesAtom, laundryStoresAtom } from '@/store/atoms';
+import { useToast, ToastMessages } from '@/components/toast';
 import AppHeader from '@/components/app-header';
 import WalletTopup from '@/components/wallet-topup';
 import { authorize, getUserInfo, getPhoneNumber, getSetting } from 'zmp-sdk/apis';
@@ -30,6 +31,7 @@ function ProfilePage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showReservationsModal, setShowReservationsModal] = useState(false);
   const [showTopupModal, setShowTopupModal] = useState(false);
+  const { showSuccess, showError, ToastContainer } = useToast();
 
   // Mock transaction history
   const transactionHistory = [
@@ -171,16 +173,12 @@ function ProfilePage() {
     });
 
     setShowTopupModal(false);
-    
-    if (bonusAmount > 0) {
-      alert(`✅ Nạp thành công ${amount.toLocaleString()}đ + ${bonusAmount.toLocaleString()}đ tiền thưởng!\n🎁 Tiền thưởng có hạn sử dụng 30 ngày`);
-    } else {
-      alert(`✅ Nạp thành công ${amount.toLocaleString()}đ vào ví!`);
-    }
+    showSuccess(ToastMessages.success.payment);
   };
 
   return (
     <Page className="bg-gray-50 min-h-screen">
+      <ToastContainer />
       {/* Safe Area */}
       <Box className="safe-area-top bg-white" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }} />
       
@@ -280,8 +278,8 @@ function ProfilePage() {
         <Box className="mx-4 mt-4 bg-white rounded-2xl shadow-sm overflow-hidden">
           <List>
             <List.Item
-              title="Đặt chỗ của tôi"
-              subTitle={`${activeReservations.length} máy đang hoạt động`}
+              title="Máy đang hoạt động"
+              subTitle={`${activeReservations.length} máy đang chạy`}
               prefix={<Icon icon="zi-calendar" className="text-purple-600" />}
               suffix={<Icon icon="zi-chevron-right" />}
               onClick={() => setShowReservationsModal(true)}
@@ -394,10 +392,10 @@ function ProfilePage() {
         </Box>
       </Modal>
 
-      {/* My Reservations Modal */}
+      {/* Active Machines Modal */}
       <Modal
         visible={showReservationsModal}
-        title="Đặt chỗ của tôi"
+        title="Máy đang hoạt động"
         onClose={() => setShowReservationsModal(false)}
       >
         <Box className="p-4">
@@ -440,12 +438,12 @@ function ProfilePage() {
                 </Box>
               );
             })
-          ) : (
+            ) : (
             <Box className="text-center py-8">
               <Icon icon="zi-calendar" className="text-gray-400 text-4xl mb-3" />
-              <Text className="text-gray-500 mb-2">Chưa có đặt chỗ nào</Text>
+              <Text className="text-gray-500 mb-2">Chưa có máy nào đang chạy</Text>
               <Text size="small" className="text-gray-400">
-                Hãy đặt chỗ máy giặt để theo dõi tại đây
+                Hãy quét QR tại tiệm để bắt đầu và theo dõi tại đây
               </Text>
             </Box>
           )}

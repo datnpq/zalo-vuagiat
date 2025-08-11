@@ -2,16 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Box, Page, Text, Button, Icon, Input, Select } from 'zmp-ui';
 import { useAtom } from 'jotai';
 import AppHeader from '@/components/app-header';
-import MachineCard from '@/components/machine-card';
 import StoreCard from '@/components/store-card';
 import MachineIcon from '@/components/machine-icon';
 import QRScanner from '@/components/qr-scanner';
 import MachineActivation from '@/components/machine-activation';
+import { useToast, ToastMessages } from '@/components/toast';
+import EmptyState from '@/components/empty-state';
 import { 
   userAtom, 
   activeReservationsAtom, 
   laundryStoresAtom,
-  selectedStoreAtom 
+  selectedStoreAtom,
+  activeTabAtom,
+  selectedMachineAtom,
+  reservationsAtom
 } from '@/store/atoms';
 
 interface HomePageProps {
@@ -23,12 +27,17 @@ function HomePage({}: HomePageProps = {}) {
   const [activeReservations] = useAtom(activeReservationsAtom);
   const [laundryStores] = useAtom(laundryStoresAtom);
   const [selectedStore, setSelectedStore] = useAtom(selectedStoreAtom);
+  const [, setActiveTab] = useAtom(activeTabAtom);
+  const [, setSelectedMachine] = useAtom(selectedMachineAtom);
+  const [reservations, setReservations] = useAtom(reservationsAtom);
+  const { showSuccess, showError, ToastContainer } = useToast();
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showMachineActivation, setShowMachineActivation] = useState(false);
   const [scannedMachineData, setScannedMachineData] = useState<any>(null);
 
   const handleStoreSelect = (store: any) => {
     setSelectedStore(store);
+    setActiveTab('machines');
   };
 
   const handleQRScanned = (qrData: string) => {
@@ -41,21 +50,45 @@ function HomePage({}: HomePageProps = {}) {
       setShowMachineActivation(true);
     } catch (error) {
       console.error('Invalid QR data:', error);
-      alert('Mã QR không hợp lệ. Vui lòng thử lại.');
+      showError(ToastMessages.error.machineUnavailable);
     }
   };
 
   const handleMachineActivated = (machineId: string, paymentMethod: string) => {
-    console.log(`Machine ${machineId} activated with ${paymentMethod}`);
-    
-    // TODO: Update machine status to in-use
-    // TODO: Create new active reservation
-    
-    alert(`✅ Máy ${machineId} đã được kích hoạt! Chúc bạn giặt vui vẻ!`);
-    
-    // Reset state
+    showSuccess(ToastMessages.success.reservation);
+    if (scannedMachineData) {
+      setSelectedMachine({
+        id: scannedMachineData.machineId,
+        type: scannedMachineData.type,
+        status: 'in-use',
+        remainingTime: scannedMachineData.type === 'washing' ? 40 : 30,
+        capacity: scannedMachineData.capacity,
+        price: scannedMachineData.price,
+        features: scannedMachineData.features,
+      });
+
+      // Add active reservation for sync across app (badge, profile list)
+      const now = new Date();
+      const end = new Date(now.getTime() + ((scannedMachineData.type === 'washing' ? 40 : 30) * 60 * 1000));
+      setReservations(prev => ([
+        ...prev,
+        {
+          id: `res_${Date.now()}`,
+          userId: 'user1',
+          storeId: scannedMachineData.storeId,
+          machineId: scannedMachineData.machineId,
+          startTime: now,
+          endTime: end,
+          status: 'active',
+          paymentStatus: paymentMethod === 'wallet' ? 'paid' : 'pending',
+          totalAmount: scannedMachineData.price,
+          progress: 0,
+        }
+      ]));
+    }
     setShowMachineActivation(false);
     setScannedMachineData(null);
+    setActiveTab('monitor');
   };
 
   const favoriteStore = laundryStores.find(store => store.id === 'store1');
@@ -73,7 +106,7 @@ function HomePage({}: HomePageProps = {}) {
         <Box className="mb-6">
           <Box 
             className="bg-white rounded-2xl shadow-sm border border-gray-100 cursor-pointer transition-all duration-200 hover:shadow-md"
-            onClick={() => window.location.hash = '#map'}
+            onClick={() => setActiveTab('map')}
           >
             <Box className="flex items-center px-4 py-4">
               <Icon icon="zi-search" className="icon-secondary mr-3 icon-lg" />
@@ -154,31 +187,16 @@ function HomePage({}: HomePageProps = {}) {
           </Box>
         </Box>
 
-        {/* Current Active Reservations */}
-        {activeReservations.length > 0 && (
-          <Box className="mb-6">
-            <Text.Title size="small" className="mb-4 font-bold text-gray-900">
-              Máy đã giữ chỗ ({activeReservations.length})
-            </Text.Title>
-            
-            <Box className="space-y-4">
-              {activeReservations.map((reservation) => {
-                const store = laundryStores.find(s => s.id === reservation.storeId);
-                const machine = store?.washingMachines.find(m => m.id === reservation.machineId) ||
-                              store?.dryingMachines.find(m => m.id === reservation.machineId);
-                
-                if (!machine) return null;
-                
-                return (
-                  <MachineCard
-                    key={reservation.id}
-                    machine={machine}
-                    onSelect={() => {}}
-                  />
-                );
-              })}
-            </Box>
-          </Box>
+        {/* Empty state when no active machine */}
+        {activeReservations.length === 0 && (
+          <EmptyState
+            type="no-reservations"
+            title="Chưa có máy nào đang chạy"
+            subtitle="Quét QR tại tiệm để bắt đầu"
+            actionText="Quét QR"
+            onAction={() => setShowQRScanner(true)}
+            className="py-6"
+          />
         )}
 
         {/* Nearby Stores */}
@@ -191,7 +209,7 @@ function HomePage({}: HomePageProps = {}) {
               size="small"
               variant="tertiary"
               className="text-blue-600 p-1"
-              onClick={() => window.location.hash = '#map'}
+              onClick={() => setActiveTab('map')}
             >
               <Icon icon="zi-plus" className="icon-primary icon-sm mr-1" />
               <Text size="xSmall" className="font-medium">Thêm</Text>
@@ -223,23 +241,20 @@ function HomePage({}: HomePageProps = {}) {
           </Box>
         )}
 
-        {/* Large QR Scan Button */}
-        <Box className="flex justify-center mb-8 px-4">
+        {/* Floating QR FAB */}
+        <Box className="fixed bottom-24 right-4 z-50">
           <Button
+            round
+            className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+            icon={<Icon icon="zi-qrline" className="text-xl" />}
             onClick={() => setShowQRScanner(true)}
-            className="w-full max-w-xs h-20 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-          >
-            <Box className="flex items-center justify-center space-x-4">
-              <Icon icon="zi-qrline" className="text-4xl" />
-              <Box>
-                <div className="text-lg font-bold">Quét mã QR</div>
-                <div className="text-sm opacity-90">Kích hoạt máy giặt</div>
-              </Box>
-            </Box>
-          </Button>
+          />
         </Box>
         
       </Box>
+
+      {/* Toasts */}
+      <ToastContainer />
 
       {/* QR Scanner Modal */}
       <QRScanner

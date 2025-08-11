@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Header, Text, Button, Icon } from 'zmp-ui';
 import { useAtom } from 'jotai';
-import { userAtom } from '@/store/atoms';
+import { userAtom, qrScanRequestAtom } from '@/store/atoms';
 
 interface AppHeaderProps {
   title?: string;
@@ -17,6 +17,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   rightAction
 }) => {
   const [user] = useAtom(userAtom);
+  const [, setQrScan] = useAtom(qrScanRequestAtom);
 
   return (
     <Box className="app-header bg-white/95 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -45,7 +46,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
           {/* Right side - Actions */}
           <Box className="w-10 flex justify-end">
-            {rightAction}
+            {rightAction ? (
+              rightAction
+            ) : (
+              <Button
+                variant="tertiary"
+                size="small"
+                onClick={() => setQrScan(true)}
+                className="btn-hover-lift focus-ring"
+                icon={<Icon icon="zi-qrline" className="icon-secondary icon-md" />}
+              />
+            )}
           </Box>
         </Box>
       </Box>

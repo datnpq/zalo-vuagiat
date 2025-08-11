@@ -1,16 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { Box, Page, Text, Button, Icon, Select } from 'zmp-ui';
-import { selectedMachineAtom, selectedStoreAtom, activeReservationsAtom } from '@/store/atoms';
+import { selectedMachineAtom, selectedStoreAtom, activeReservationsAtom, notificationSettingsAtom } from '@/store/atoms';
+import { useToast } from '@/components/toast';
 import AppHeader from '@/components/app-header';
 
 function MachineMonitoringPage() {
   const [selectedMachine] = useAtom(selectedMachineAtom);
   const [selectedStore] = useAtom(selectedStoreAtom);
   const [activeReservations] = useAtom(activeReservationsAtom);
-  const [progress, setProgress] = useState(12);
-  const [remainingTime, setRemainingTime] = useState(40);
-  const [notificationMinutes, setNotificationMinutes] = useState('5');
+  const [notificationSettings, setNotificationSettings] = useAtom(notificationSettingsAtom);
+  const { showInfo, showWarning } = useToast();
+  const notifiedRef = useRef(false);
+
+  // Find the active reservation for selected machine
+  const reservation = useMemo(() => {
+    if (!selectedMachine) return null;
+    return activeReservations.find(r => r.machineId === selectedMachine.id && r.status === 'active') || null;
+  }, [activeReservations, selectedMachine]);
+
+  // Derived time/progress from reservation
+  const { progress, remainingMinutes } = useMemo(() => {
+    if (!reservation) return { progress: 0, remainingMinutes: 0 };
+    const now = Date.now();
+    const start = new Date(reservation.startTime).getTime();
+    const end = new Date(reservation.endTime).getTime();
+    const total = Math.max(1, end - start);
+    const elapsed = Math.max(0, now - start);
+    const pct = Math.min(100, Math.round((elapsed / total) * 100));
+    const remainingMs = Math.max(0, end - now);
+    return { progress: pct, remainingMinutes: Math.ceil(remainingMs / 60000) };
+  }, [reservation]);
+
+  // Notify when approaching completion based on settings
+  useEffect(() => {
+    if (!reservation) return;
+    const threshold = notificationSettings.beforeCompletion; // minutes
+    if (notificationSettings.enabled && remainingMinutes === threshold && !notifiedRef.current) {
+      showWarning('⏰ Máy sắp xong rồi! Chuẩn bị nhận đồ nha');
+      notifiedRef.current = true;
+    }
+    if (remainingMinutes > threshold) {
+      // reset to allow re-notify on next cycle if user changed settings
+      notifiedRef.current = false;
+    }
+  }, [reservation, remainingMinutes, notificationSettings, showWarning]);
 
   // Simulate progress updates
   useEffect(() => {
@@ -151,7 +185,7 @@ function MachineMonitoringPage() {
             <Box flex className="items-center justify-center space-x-1">
               <Icon icon="zi-clock-1" className="text-gray-500" />
               <Text size="small" className="text-gray-600">
-                {remainingTime} phút còn lại
+                 {remainingMinutes} phút còn lại
               </Text>
             </Box>
           </Box>
@@ -162,8 +196,11 @@ function MachineMonitoringPage() {
               Thông báo trước khi hoàn thành (phút)
             </Text>
             <Select
-              value={notificationMinutes}
-              onChange={(value) => setNotificationMinutes(value as string)}
+              value={String(notificationSettings.beforeCompletion)}
+              onChange={(value) => setNotificationSettings({
+                ...notificationSettings,
+                beforeCompletion: parseInt(value as string, 10)
+              })}
               placeholder="Chọn thời gian"
             >
               <Select.Option value="0" title="Tắt thông báo" />

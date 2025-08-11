@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { Box, Page, Text, Button, Icon } from 'zmp-ui';
-import { laundryStoresAtom, selectedStoreAtom } from '@/store/atoms';
+import { laundryStoresAtom, selectedStoreAtom, activeTabAtom } from '@/store/atoms';
 import AppHeader from '@/components/app-header';
 import StoreCard from '@/components/store-card';
 
@@ -15,6 +15,7 @@ interface MapPageProps {
 function MapPage() {
   const [laundryStores] = useAtom(laundryStoresAtom);
   const [selectedStore, setSelectedStore] = useAtom(selectedStoreAtom);
+  const [, setActiveTab] = useAtom(activeTabAtom);
   const [searchArea, setSearchArea] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -117,6 +118,9 @@ function MapPage() {
         speed: 1.2,
       });
     }
+
+    // Navigate to store detail
+    setActiveTab('machines');
   };
 
   const handleSearchArea = () => {

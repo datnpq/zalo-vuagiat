@@ -128,31 +128,7 @@ export const laundryStoresAtom = atom<LaundryStore[]>([
   }
 ]);
 
-export const reservationsAtom = atom<Reservation[]>([
-  {
-    id: 'res1',
-    userId: 'user1',
-    storeId: 'store1',
-    machineId: 'wash1',
-    startTime: new Date(),
-    endTime: new Date(Date.now() + 40 * 60 * 1000),
-    status: 'active',
-    paymentStatus: 'paid',
-    totalAmount: 25000,
-    progress: 12
-  },
-  {
-    id: 'res2',
-    userId: 'user1',
-    storeId: 'store1',
-    machineId: 'dry2',
-    startTime: new Date(Date.now() - 15 * 60 * 1000),
-    endTime: new Date(Date.now() + 25 * 60 * 1000),
-    status: 'completed',
-    paymentStatus: 'paid',
-    totalAmount: 30000
-  }
-]);
+export const reservationsAtom = atom<Reservation[]>([]);
 
 export const notificationSettingsAtom = atom<NotificationSettings>({
   beforeCompletion: 5,
@@ -170,3 +146,9 @@ export const activeReservationsAtom = atom((get) =>
 export const interestedMachinesAtom = atom((get) => 
   get(reservationsAtom).filter(r => r.status === 'completed')
 );
+
+// Global navigation state
+export const activeTabAtom = atom<'home' | 'map' | 'machines' | 'profile' | 'monitor'>('home');
+
+// Global QR scan request trigger
+export const qrScanRequestAtom = atom<boolean>(false);
