@@ -211,33 +211,35 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
       </Box>
 
-      {/* Enhanced Bottom buttons */}
-      <Box className="p-6 flex space-x-4 relative z-10">
+      {/* Beautiful Bottom buttons */}
+      <Box className="p-6 flex space-x-3 relative z-10">
         {currentSlide < slides.length - 1 && (
           <Button
             variant="tertiary"
-            className="flex-1 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:border-gray-300 transition-all duration-300 py-4 rounded-xl font-semibold shadow-sm"
+            className="flex-1 bg-white border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 py-4 rounded-2xl font-medium shadow-sm"
             onClick={handleSkip}
           >
-            <Icon icon="zi-arrow-right" className="mr-2" />
-            Bỏ qua
+            <Box className="flex items-center justify-center gap-2">
+              <Icon icon="zi-arrow-right" className="text-lg" />
+              <Text className="font-medium">Bỏ qua</Text>
+            </Box>
           </Button>
         )}
         <Button
           variant="primary"
-          className={`${currentSlide < slides.length - 1 ? 'flex-1' : 'w-full'} bg-gradient-to-r ${slides[currentSlide].color} text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300`}
+          className={`${currentSlide < slides.length - 1 ? 'flex-1' : 'w-full'} bg-gradient-to-r ${slides[currentSlide].color} text-white font-semibold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200`}
           onClick={handleNext}
         >
           <Box className="flex items-center justify-center gap-2">
             {currentSlide === slides.length - 1 ? (
               <>
-                <Icon icon="zi-star" className="text-xl" />
-                <Text className="text-lg font-bold">{slides[currentSlide].buttonText}</Text>
+                <Icon icon="zi-star" className="text-lg" />
+                <Text className="font-semibold">{slides[currentSlide].buttonText}</Text>
               </>
             ) : (
               <>
-                <Text className="text-lg font-bold">{slides[currentSlide].buttonText}</Text>
-                <Icon icon="zi-arrow-right" className="text-xl" />
+                <Text className="font-semibold">{slides[currentSlide].buttonText}</Text>
+                <Icon icon="zi-arrow-right" className="text-lg" />
               </>
             )}
           </Box>

@@ -187,10 +187,7 @@ const StoreCard: React.FC<StoreCardProps> = ({
         {/* Machine Status Row - Enhanced */}
         <Box flex className="items-center justify-between gap-6">
           {/* Washing Machines - Enhanced */}
-          <Box flex className="items-center gap-4 flex-1 p-3 bg-white/60 rounded-xl backdrop-blur-sm border border-white/40 shadow-sm hover:shadow-md transition-all duration-300">
-            <Box className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-              <Text size="xxSmall" className="font-bold text-white">GIẶT</Text>
-            </Box>
+          <Box flex className="items-center gap-3 flex-1 p-3 bg-white/60 rounded-xl backdrop-blur-sm border border-white/40 shadow-sm hover:shadow-md transition-all duration-300">
             <Box className="w-16 h-16 rounded-xl bg-white border-2 border-blue-200 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 group-hover:border-blue-300">
               <MachineIcon type="washing" size={32} status="available" />
             </Box>
@@ -206,10 +203,7 @@ const StoreCard: React.FC<StoreCardProps> = ({
           </Box>
 
           {/* Drying Machines - Enhanced */}
-          <Box flex className="items-center gap-4 flex-1 p-3 bg-white/60 rounded-xl backdrop-blur-sm border border-white/40 shadow-sm hover:shadow-md transition-all duration-300">
-            <Box className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-              <Text size="xxSmall" className="font-bold text-white">SẤY</Text>
-            </Box>
+          <Box flex className="items-center gap-3 flex-1 p-3 bg-white/60 rounded-xl backdrop-blur-sm border border-white/40 shadow-sm hover:shadow-md transition-all duration-300">
             <Box className="w-16 h-16 rounded-xl bg-white border-2 border-purple-200 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 group-hover:border-purple-300">
               <MachineIcon type="drying" size={32} status="available" />
             </Box>

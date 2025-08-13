@@ -133,8 +133,8 @@ const StoreCard: React.FC<StoreCardProps> = ({
         <Box className="grid grid-cols-2 gap-4">
           {/* Enhanced Washing Machines */}
           <Box className="flex items-center space-x-3">
-            <Box className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-              <MachineIcon type="washing" size={20} status="available" className="text-white" />
+            <Box className="w-14 h-14 rounded-xl bg-white border-2 border-blue-200 flex items-center justify-center shadow-lg">
+              <MachineIcon type="washing" size={24} status="available" />
             </Box>
             <Box>
               <Text size="xSmall" className="text-gray-700 mb-1 font-semibold">Máy giặt</Text>
@@ -149,8 +149,8 @@ const StoreCard: React.FC<StoreCardProps> = ({
 
           {/* Enhanced Drying Machines */}
           <Box className="flex items-center space-x-3">
-            <Box className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-              <MachineIcon type="drying" size={20} status="available" className="text-white" />
+            <Box className="w-14 h-14 rounded-xl bg-white border-2 border-purple-200 flex items-center justify-center shadow-lg">
+              <MachineIcon type="drying" size={24} status="available" />
             </Box>
             <Box>
               <Text size="xSmall" className="text-gray-700 mb-1 font-semibold">Máy sấy</Text>

@@ -179,7 +179,7 @@ function HomePage({}: HomePageProps = {}) {
                 className="bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors duration-200 px-4 rounded-xl"
                 onClick={() => setActiveTab('profile')}
               >
-                <Icon icon="zi-clock-1" />
+                <Icon icon="zi-user" />
               </Button>
             </Box>
           </Box>
@@ -221,7 +221,6 @@ function HomePage({}: HomePageProps = {}) {
               className="bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 transition-all duration-300 hover:scale-105 shadow-sm"
               onClick={() => setActiveTab('map')}
             >
-              <Icon icon="zi-plus" className="mr-1" size={14} />
               <Text size="xSmall" className="font-semibold">Xem thêm</Text>
             </Button>
           </Box>
@@ -267,16 +266,13 @@ function HomePage({}: HomePageProps = {}) {
           </Box>
         )}
 
-        {/* Clean Floating QR FAB */}
+        {/* Clean Floating QR FAB - Icon Only */}
         <Box className="fixed bottom-28 right-4 z-50">
           <Button
             className="w-14 h-14 bg-blue-500 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-2xl"
             icon={<Icon icon="zi-qrline" className="text-xl" />}
             onClick={() => setShowQRScanner(true)}
           />
-          <Box className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded shadow-sm">
-            <Text size="xxSmall" className="font-medium text-gray-700">Quét QR</Text>
-          </Box>
         </Box>
         
       </Box>

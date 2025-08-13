@@ -64,59 +64,62 @@ const MachineCard: React.FC<MachineCardProps> = ({
   return (
     <>
       <ToastContainer />
-      <Box className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-        <Box flex className="items-center justify-between mb-3">
-          <Box flex className="items-center space-x-3">
-            <Box className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+      <Box
+        className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer"
+        onClick={onSelect && machine.status === 'available' ? handleMachineSelect : undefined}
+      >
+        <Box flex className="items-start justify-between mb-4">
+          <Box flex className="items-center gap-4 flex-1">
+            <Box className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-md ${
               machine.type === 'washing'
-                ? 'bg-blue-500'
-                : 'bg-purple-500'
+                ? 'bg-gradient-to-br from-blue-500 to-blue-600'
+                : 'bg-gradient-to-br from-purple-500 to-purple-600'
             }`}>
               <MachineIcon
                 type={machine.type}
-                size={24}
+                size={28}
                 status={machine.status}
                 className="text-white"
               />
             </Box>
-            <Box>
-              <Text className="font-semibold text-gray-900 text-base">
+            <Box className="flex-1">
+              <Text className="font-bold text-gray-900 text-lg mb-1">
                 {machine.type === 'washing' ? 'Máy giặt' : 'Máy sấy'} #{machine.id.slice(-1)}
               </Text>
-              <Box flex className="items-center gap-2 mt-1">
-                <Text size="small" className="text-gray-600">
+              <Box flex className="items-center gap-3">
+                <Text size="small" className="text-gray-600 font-medium">
                   {machine.capacity}kg
                 </Text>
-                <Text size="small" className="text-blue-600 font-semibold">
+                <Text size="small" className="text-blue-600 font-bold">
                   {machine.price.toLocaleString()}₫
                 </Text>
               </Box>
             </Box>
           </Box>
           
-          <Box className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${getStatusColor(machine.status)}`}>
+          <Box className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${getStatusColor(machine.status)}`}>
             {getStatusText(machine.status)}
           </Box>
         </Box>
 
         {showProgress && (
-          <Box className="mb-3">
-            <Box flex className="items-center justify-between mb-2">
-              <Text size="small" className="text-gray-600">
+          <Box className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+            <Box flex className="items-center justify-between mb-3">
+              <Text size="small" className="text-blue-700 font-semibold">
                 {machine.type === 'washing' ? 'Đang giặt' : 'Đang sấy'}
               </Text>
-              <Text size="small" className="text-gray-600 font-semibold">
+              <Text size="small" className="text-blue-700 font-bold">
                 {progress}%
               </Text>
             </Box>
-            <Box className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <Box className="w-full bg-blue-200 rounded-full h-3 overflow-hidden">
               <Box
-                className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 shadow-sm"
                 style={{ width: `${progress}%` }}
               />
             </Box>
             {remainingTime && (
-              <Text size="xSmall" className="text-gray-500 mt-1">
+              <Text size="small" className="text-blue-600 mt-2 font-medium">
                 {remainingTime} phút còn lại
               </Text>
             )}
@@ -124,10 +127,10 @@ const MachineCard: React.FC<MachineCardProps> = ({
         )}
 
         {machine.features.length > 0 && (
-          <Box className="mb-3">
-            <Box flex className="flex-wrap gap-1.5">
+          <Box className="mt-4">
+            <Box flex className="flex-wrap gap-2">
               {machine.features.slice(0, 2).map((feature, index) => (
-                <Box key={index} className="bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
+                <Box key={index} className="bg-gray-100 px-3 py-1.5 rounded-full text-sm text-gray-700 font-medium">
                   {feature}
                 </Box>
               ))}
@@ -135,39 +138,14 @@ const MachineCard: React.FC<MachineCardProps> = ({
           </Box>
         )}
 
-        {onSelect && machine.status === 'available' && (
-          <Button
-            fullWidth
-            variant="primary"
-            size="medium"
-            onClick={handleMachineSelect}
-            loading={isSelecting}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
-          >
-            {isSelecting ? 'Đang chuẩn bị...' : 'Chọn máy này'}
-          </Button>
-        )}
-
-        {machine.status === 'in-use' && remainingTime && (
-          <Button
-            fullWidth
-            variant="tertiary"
-            size="medium"
-            onClick={onSelect}
-            className="border border-blue-200 text-blue-600 hover:bg-blue-50 font-semibold py-3 rounded-lg transition-colors duration-200"
-          >
-            Theo dõi máy này
-          </Button>
-        )}
-
         {machine.status === 'maintenance' && (
-          <Box className="text-center py-3 bg-gray-50 rounded-lg">
-            <Text size="small" className="text-gray-500">
+          <Box className="text-center py-4 bg-gray-50 rounded-2xl mt-4">
+            <Text size="small" className="text-gray-500 font-medium">
               Máy đang bảo trì
             </Text>
           </Box>
         )}
-    </Box>
+      </Box>
     </>
   );
 };

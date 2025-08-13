@@ -327,31 +327,31 @@ function ProfilePage() {
         </Box>
 
         {/* Enhanced Quick Stats */}
-        <Box className="mx-4 mt-4 bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
+        <Box className="mx-4 mt-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <Text className="font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Text className="text-blue-500">📊</Text>
             Thống kê của bạn
           </Text>
-          <Box className="grid grid-cols-4 gap-3">
-            <Box className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+          <Box className="grid grid-cols-4 gap-2">
+            <Box className="text-center p-3 bg-purple-50 rounded-2xl border border-purple-200">
               <Text.Title className="text-purple-600 font-bold text-lg">
                 {activeReservations.length}
               </Text.Title>
               <Text size="xSmall" className="text-purple-700 font-medium">Đang giặt</Text>
             </Box>
-            <Box className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+            <Box className="text-center p-3 bg-green-50 rounded-2xl border border-green-200">
               <Text.Title className="text-green-600 font-bold text-lg">
                 {user.favoriteStores.length}
               </Text.Title>
               <Text size="xSmall" className="text-green-700 font-medium">Tiệm quen</Text>
             </Box>
-            <Box className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+            <Box className="text-center p-3 bg-blue-50 rounded-2xl border border-blue-200">
               <Text.Title className="text-blue-600 font-bold text-lg">
                 {user.totalWashes || 0}
               </Text.Title>
               <Text size="xSmall" className="text-blue-700 font-medium">Đã giặt</Text>
             </Box>
-            <Box className="text-center p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+            <Box className="text-center p-3 bg-orange-50 rounded-2xl border border-orange-200">
               <Text.Title className="text-orange-600 font-bold text-lg">
                 {user.loyaltyPoints || 0}
               </Text.Title>
@@ -381,12 +381,6 @@ function ProfilePage() {
               title="Tiệm yêu thích"
               subTitle={`${user.favoriteStores.length} tiệm đã lưu`}
               prefix={<Icon icon="zi-star" className="text-yellow-500" />}
-              suffix={<Icon icon="zi-chevron-right" />}
-            />
-            <List.Item
-              title="Máy quan tâm"
-              subTitle={`${interestedMachines.length} máy đang theo dõi`}
-              prefix={<Icon icon="zi-heart" className="text-red-500" />}
               suffix={<Icon icon="zi-chevron-right" />}
             />
           </List>

@@ -169,7 +169,7 @@ function MapPage() {
                 <Box className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                   <Icon icon="zi-location" size={32} className="text-white animate-pulse" />
                 </Box>
-                <Text className="text-gray-800 font-semibold text-lg mb-2">Đang tải bản đồ...</Text>
+                <Text className="text-gray-800 font-semibold text-lg mb-2">Đang tải bản đồ nha...</Text>
                 <Text className="text-gray-600 text-sm">Tìm kiếm tiệm giặt gần bạn</Text>
                 <Box className="flex justify-center gap-1 mt-4">
                   <Box className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
@@ -199,22 +199,22 @@ function MapPage() {
               size="small"
               variant="secondary"
               className="bg-white/90 backdrop-blur-md shadow-lg w-12 h-12 p-0 rounded-xl border border-white/50 hover:scale-110 transition-all duration-300"
-              icon={<Icon icon="zi-plus" className="text-blue-600" />}
+              icon={<Icon icon="zi-plus-circle" className="text-blue-600" />}
               onClick={handleZoomIn}
             />
             <Button
               size="small"
               variant="secondary"
               className="bg-white/90 backdrop-blur-md shadow-lg w-12 h-12 p-0 rounded-xl border border-white/50 hover:scale-110 transition-all duration-300"
+              icon={<Icon icon="zi-minus-circle" className="text-blue-600" />}
               onClick={handleZoomOut}
             >
-              <Text className="text-blue-600 font-bold text-lg">-</Text>
             </Button>
             <Button
               size="small"
               variant="secondary"
               className="bg-white/90 backdrop-blur-md shadow-lg w-12 h-12 p-0 rounded-xl border border-white/50 hover:scale-110 transition-all duration-300"
-              icon={<Icon icon="zi-location" className="text-blue-600" />}
+              icon={<Icon icon="zi-location-solid" className="text-blue-600" />}
               onClick={handleLocate}
             />
           </Box>

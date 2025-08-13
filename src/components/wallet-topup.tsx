@@ -174,12 +174,16 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
                 variant={selectedAmount === amount.value ? 'primary' : 'tertiary'}
                 size="medium"
                 onClick={() => handleAmountSelect(amount.value)}
-                className="flex flex-col py-4"
+                className={`flex flex-col py-4 px-3 rounded-2xl font-medium transition-all duration-200 min-h-[80px] ${
+                  selectedAmount === amount.value
+                    ? 'bg-blue-500 text-white shadow-lg transform scale-105'
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md'
+                }`}
               >
-                <Text size="normal" className="font-semibold mb-1">
+                <Text className="font-bold mb-1 text-base">
                   {amount.label}
                 </Text>
-                <Text size="xSmall" className="opacity-70">
+                <Text size="xSmall" className="opacity-70 font-medium">
                   {amount.value.toLocaleString()}đ
                 </Text>
               </Button>
@@ -187,15 +191,15 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
           </Box>
 
           {/* Custom Amount */}
-          <Box>
-            <Text size="small" className="text-gray-600 mb-2">
+          <Box className="bg-gray-50 rounded-2xl p-4">
+            <Text size="small" className="text-gray-600 mb-3 font-medium">
               Hoặc nhập số tiền khác (tối thiểu 10,000đ)
             </Text>
             <Input
               placeholder="Nhập số tiền..."
               value={customAmount}
               onChange={(e) => handleCustomAmountChange(e.target.value)}
-              className="text-center text-lg font-semibold"
+              className="text-center text-lg font-semibold bg-white border-2 border-gray-200 rounded-xl py-3"
               suffix="đ"
             />
           </Box>
@@ -211,40 +215,39 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
             {paymentMethods.map((method) => (
               <Box
                 key={method.value}
-                className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  paymentMethod === method.value 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                className={`flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
+                  paymentMethod === method.value
+                    ? 'border-blue-500 bg-blue-50 shadow-md transform scale-[1.02]'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md hover:bg-gray-50'
                 }`}
                 onClick={() => setPaymentMethod(method.value)}
               >
-                <Box 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mr-3 text-2xl"
+                <Box
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mr-4 text-xl shadow-sm"
                   style={{ backgroundColor: `${method.color}20`, color: method.color }}
                 >
                   {method.icon}
                 </Box>
                 <Box className="flex-1">
-                  <Text 
-                    size="normal" 
-                    className={`font-medium ${
-                      paymentMethod === method.value ? 'text-blue-700' : 'text-gray-700'
+                  <Text
+                    className={`font-semibold text-base mb-1 ${
+                      paymentMethod === method.value ? 'text-blue-700' : 'text-gray-800'
                     }`}
                   >
                     {method.label}
                   </Text>
                   {method.value === 'zalopay' && (
-                    <Text size="xSmall" className="text-gray-500">Thanh toán nhanh, bảo mật</Text>
+                    <Text size="small" className="text-gray-500 font-medium">Thanh toán nhanh, bảo mật</Text>
                   )}
                   {method.value === 'momo' && (
-                    <Text size="xSmall" className="text-gray-500">Ví điện tử phổ biến</Text>
+                    <Text size="small" className="text-gray-500 font-medium">Ví điện tử phổ biến</Text>
                   )}
                   {method.value === 'bank' && (
-                    <Text size="xSmall" className="text-gray-500">Chuyển khoản trực tiếp</Text>
+                    <Text size="small" className="text-gray-500 font-medium">Chuyển khoản trực tiếp</Text>
                   )}
                 </Box>
                 {paymentMethod === method.value && (
-                  <Icon icon="zi-check-circle" className="text-blue-500" />
+                  <Icon icon="zi-check-circle" className="text-blue-500 text-2xl" />
                 )}
               </Box>
             ))}
@@ -253,52 +256,54 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
 
         {/* Summary */}
         {selectedAmount > 0 && (
-          <Box className="bg-gray-50 rounded-xl p-4">
-            <Text size="small" className="text-gray-600 mb-3">Tóm tắt giao dịch</Text>
-            <Box className="flex justify-between items-center mb-2">
-              <Text size="normal">Số tiền nạp:</Text>
-              <Text size="normal" className="font-semibold">
-                {selectedAmount.toLocaleString()}đ
-              </Text>
-            </Box>
-            
-            {getBonusAmount() > 0 && (
-              <Box className="flex justify-between items-center mb-2">
-                <Text size="normal" className="text-orange-600">🎁 Tiền thưởng (10%):</Text>
-                <Text size="normal" className="font-semibold text-orange-600">
-                  +{getBonusAmount().toLocaleString()}đ
-                </Text>
-              </Box>
-            )}
-            
-            <Box className="flex justify-between items-center mb-2">
-              <Text size="normal">Phương thức:</Text>
-              <Text size="normal" className="font-medium">
-                {getSelectedMethodInfo().label}
-              </Text>
-            </Box>
-            
-            <Box className="border-t border-gray-200 pt-3 mt-3">
-              <Box className="flex justify-between items-center mb-2">
-                <Text size="normal" className="font-semibold">Tổng nhận được:</Text>
-                <Text size="large" className="font-bold text-blue-600">
-                  {getTotalAmount().toLocaleString()}đ
-                </Text>
-              </Box>
+          <Box className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-5 border border-gray-200">
+            <Text size="normal" className="text-gray-700 mb-4 font-bold">📋 Tóm tắt giao dịch</Text>
+            <Box className="space-y-3">
               <Box className="flex justify-between items-center">
-                <Text size="normal" className="font-semibold">Số dư sau nạp:</Text>
-                <Text size="normal" className="font-bold text-green-600">
-                  {(currentBalance + getTotalAmount()).toLocaleString()}đ
+                <Text size="normal" className="text-gray-600">Số tiền nạp:</Text>
+                <Text size="normal" className="font-bold text-gray-800">
+                  {selectedAmount.toLocaleString()}đ
                 </Text>
               </Box>
               
               {getBonusAmount() > 0 && (
-                <Box className="bg-orange-100 rounded-lg p-2 mt-2">
-                  <Text size="xSmall" className="text-orange-700">
-                    ⏰ Tiền thưởng {getBonusAmount().toLocaleString()}đ có hạn sử dụng 30 ngày
+                <Box className="flex justify-between items-center">
+                  <Text size="normal" className="text-orange-600 font-medium">🎁 Tiền thưởng (10%):</Text>
+                  <Text size="normal" className="font-bold text-orange-600">
+                    +{getBonusAmount().toLocaleString()}đ
                   </Text>
                 </Box>
               )}
+              
+              <Box className="flex justify-between items-center">
+                <Text size="normal" className="text-gray-600">Phương thức:</Text>
+                <Text size="normal" className="font-semibold text-gray-800">
+                  {getSelectedMethodInfo().label}
+                </Text>
+              </Box>
+              
+              <Box className="border-t border-gray-300 pt-4 mt-4">
+                <Box className="flex justify-between items-center mb-3">
+                  <Text size="normal" className="font-bold text-gray-800">Tổng nhận được:</Text>
+                  <Text size="large" className="font-bold text-blue-600">
+                    {getTotalAmount().toLocaleString()}đ
+                  </Text>
+                </Box>
+                <Box className="flex justify-between items-center">
+                  <Text size="normal" className="font-bold text-gray-800">Số dư sau nạp:</Text>
+                  <Text size="large" className="font-bold text-green-600">
+                    {(currentBalance + getTotalAmount()).toLocaleString()}đ
+                  </Text>
+                </Box>
+                
+                {getBonusAmount() > 0 && (
+                  <Box className="bg-orange-100 rounded-xl p-3 mt-3 border border-orange-200">
+                    <Text size="small" className="text-orange-700 font-medium">
+                      ⏰ Tiền thưởng {getBonusAmount().toLocaleString()}đ có hạn sử dụng 30 ngày
+                    </Text>
+                  </Box>
+                )}
+              </Box>
             </Box>
           </Box>
         )}
