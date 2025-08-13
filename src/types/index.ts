@@ -46,12 +46,18 @@ export interface User {
   id: string;
   name: string;
   phone: string;
+  email?: string;
   avatar?: string;
   balance?: number;
   bonusBalance?: number;
   bonusExpiry?: Date;
   favoriteStores: string[];
   reservations: Reservation[];
+  memberSince?: Date;
+  totalWashes?: number;
+  totalSavings?: number;
+  loyaltyPoints?: number;
+  preferredPaymentMethod?: string;
 }
 
 // Notification Types
@@ -68,3 +74,11 @@ export interface SearchParams {
   machineType?: 'washing' | 'drying';
   availableOnly?: boolean;
 }
+
+// Machine Status Labels
+export const MachineStatusLabels = {
+  available: 'Có sẵn',
+  'in-use': 'Đang dùng',
+  reserved: 'Đã đặt',
+  maintenance: 'Bảo trì'
+} as const;

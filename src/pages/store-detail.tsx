@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAtom } from 'jotai';
 import { Box, Page, Text, Button, Icon, Tabs } from 'zmp-ui';
-import { selectedStoreAtom, selectedMachineAtom } from '@/store/atoms';
+import { selectedStoreAtom, selectedMachineAtom, activeTabAtom } from '@/store/atoms';
 import AppHeader from '@/components/app-header';
 import MachineCard from '@/components/machine-card';
 import MachineIcon from '@/components/machine-icon';
@@ -13,14 +13,29 @@ interface StoreDetailPageProps {
 function StoreDetailPage() {
   const [selectedStore] = useAtom(selectedStoreAtom);
   const [selectedMachine, setSelectedMachine] = useAtom(selectedMachineAtom);
+  const [, setGlobalActiveTab] = useAtom(activeTabAtom);
   const [activeTab, setActiveTab] = useState('machines');
+  const [selectedMachineType, setSelectedMachineType] = useState<'washing' | 'drying'>('washing');
 
   if (!selectedStore) {
     return (
-      <Page>
-        <AppHeader title="Chi tiết cửa hàng" />
+      <Page className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+        <AppHeader
+          title="Chi tiết cửa hàng"
+          showBack={true}
+          onBack={() => setGlobalActiveTab('map')}
+        />
         <Box className="p-4 text-center">
-          <Text>Không tìm thấy thông tin cửa hàng</Text>
+          <Box className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+            <Text className="text-3xl">🏪</Text>
+          </Box>
+          <Text className="text-gray-600 font-medium">Không tìm thấy thông tin cửa hàng</Text>
+          <Button
+            className="mt-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+            onClick={() => setGlobalActiveTab('map')}
+          >
+            Quay lại bản đồ
+          </Button>
         </Box>
       </Page>
     );
@@ -28,73 +43,129 @@ function StoreDetailPage() {
 
   const handleMachineSelect = (machine: any) => {
     setSelectedMachine(machine);
-    // TODO: Navigate to booking page
+    setGlobalActiveTab('monitor');
+  };
+
+  const handleBackToMap = () => {
+    setGlobalActiveTab('map');
   };
 
   const allMachines = [...selectedStore.washingMachines, ...selectedStore.dryingMachines];
   const activeMachines = allMachines.filter(m => m.status === 'in-use');
 
   return (
-    <Page className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
-      <AppHeader title={selectedStore.name} />
+    <Page className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+      <AppHeader
+        title={selectedStore.name}
+        showBack={true}
+        onBack={handleBackToMap}
+      />
       
-      {/* Store Header */}
-      <Box className="clean-card m-4 p-0 overflow-hidden">
-        {/* Store Image/Gallery Slider */}
-        <Box className="relative h-48 bg-gradient-to-br from-blue-400 via-purple-500 to-indigo-600 overflow-hidden">
-          <Box className="absolute top-4 right-4 bg-black bg-opacity-30 backdrop-blur-sm text-white px-3 py-1 rounded-full">
-            <Text size="xxSmall" className="font-semibold">1/5</Text>
+      {/* Enhanced Store Header */}
+      <Box className="clean-card m-4 p-0 overflow-hidden shadow-xl border border-blue-200">
+        {/* Enhanced Store Image/Gallery */}
+        <Box className="relative h-56 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 overflow-hidden">
+          {/* Animated Background Pattern */}
+          <Box
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,${encodeURIComponent(`
+                <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="store-detail-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                      <circle cx="30" cy="30" r="1.5" fill="white" opacity="0.4"/>
+                      <circle cx="15" cy="15" r="1" fill="white" opacity="0.3"/>
+                      <circle cx="45" cy="45" r="1" fill="white" opacity="0.3"/>
+                    </pattern>
+                  </defs>
+                  <rect width="400" height="200" fill="url(#store-detail-pattern)"/>
+                </svg>
+              `)}')`
+            }}
+          />
+          
+          <Box className="absolute top-4 right-4 bg-black/30 backdrop-blur-md text-white px-4 py-2 rounded-full border border-white/20">
+            <Text size="xxSmall" className="font-bold">1/5</Text>
           </Box>
+          
           <Box className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl animate-bounce">🏪</div>
+            <Box className="text-center">
+              <Box className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-lg">
+                <Text className="text-5xl animate-bounce">🏪</Text>
+              </Box>
+              <Text className="text-white/90 font-semibold text-lg">Chi tiết cửa hàng</Text>
+            </Box>
           </Box>
         </Box>
 
-        {/* Store Info */}
-        <Box className="p-4">
-          <Text.Title size="large" className="font-bold text-gray-900 mb-2">
-            {selectedStore.name}
-          </Text.Title>
-          <Text size="small" className="text-gray-600 mb-3 line-clamp-2">
-            {selectedStore.address}
-          </Text>
-          <Box flex className="items-center space-x-4 mb-3">
-            <Box flex className="items-center space-x-1">
-              <Icon icon="zi-star" className="text-yellow-500 icon-sm" />
-              <Text size="small" className="font-semibold">{selectedStore.rating}</Text>
+        {/* Enhanced Store Info */}
+        <Box className="p-6 bg-gradient-to-r from-white to-blue-50">
+          <Box flex className="items-start gap-3 mb-4">
+            <Box className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+              <Text className="text-white font-bold">🏪</Text>
             </Box>
-            <Box flex className="items-center space-x-1">
-              <Icon icon="zi-location" className="icon-primary icon-sm" />
-              <Text size="small" className="text-gray-600">{selectedStore.distance}</Text>
-            </Box>
-            <Box className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              selectedStore.status === 'open' 
-                ? 'status-modern-available' 
-                : 'status-modern-maintenance'
-            }`}>
-              {selectedStore.status === 'open' ? 'Mở cửa' : 'Đóng cửa'}
+            <Box className="flex-1">
+              <Text.Title size="large" className="font-bold text-gray-900 mb-1">
+                {selectedStore.name}
+              </Text.Title>
+              <Box flex className="items-start gap-2 mb-3">
+                <Icon icon="zi-location" className="text-gray-400 mt-0.5 flex-shrink-0" size={14} />
+                <Text size="small" className="text-gray-600 line-clamp-2">
+                  {selectedStore.address}
+                </Text>
+              </Box>
             </Box>
           </Box>
           
-          <Box flex className="items-center space-x-2 mb-3">
+          {/* Enhanced Info Badges */}
+          <Box flex className="items-center gap-3 flex-wrap mb-4">
+            <Box flex className="items-center gap-1.5 bg-gradient-to-r from-yellow-50 to-orange-50 px-3 py-2 rounded-full border border-yellow-200 shadow-sm">
+              <Icon icon="zi-star" className="text-yellow-500" size={16} />
+              <Text size="small" className="font-bold text-yellow-700">{selectedStore.rating}</Text>
+            </Box>
+            <Box flex className="items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-2 rounded-full border border-blue-200 shadow-sm">
+              <Icon icon="zi-location" className="text-blue-500" size={16} />
+              <Text size="small" className="font-medium text-blue-700">{selectedStore.distance}km</Text>
+            </Box>
+            <Box className={`px-3 py-2 rounded-full text-xs font-bold transition-all duration-300 shadow-sm border ${
+              selectedStore.status === 'open'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400'
+                : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-400'
+            }`}>
+              <Box flex className="items-center gap-1.5">
+                <Box className={`w-2 h-2 rounded-full ${selectedStore.status === 'open' ? 'bg-white' : 'bg-gray-300'} animate-pulse`} />
+                {selectedStore.status === 'open' ? 'Mở cửa' : 'Đóng cửa'}
+              </Box>
+            </Box>
+          </Box>
+          
+          {/* Enhanced Action Buttons */}
+          <Box flex className="gap-3">
             <Button
               size="small"
               variant="tertiary"
-              icon={<Icon icon="zi-call" className="icon-success" />}
-              className="bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-all duration-200 btn-hover-lift focus-ring"
-            />
+              icon={<Icon icon="zi-call" className="text-green-600" />}
+              onClick={() => window.open(`tel:${selectedStore.phoneNumber}`)}
+              className="bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 hover:from-green-100 hover:to-emerald-100 border border-green-200 hover:border-green-300 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 rounded-xl px-4"
+            >
+              Gọi điện
+            </Button>
             <Button
               size="small"
               variant="tertiary"
-              icon={<Icon icon="zi-location" className="icon-primary" />}
-              className="bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-all duration-200 btn-hover-lift focus-ring"
-            />
+              icon={<Icon icon="zi-location" className="text-blue-600" />}
+              className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 hover:border-blue-300 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 rounded-xl px-4"
+            >
+              Chỉ đường
+            </Button>
             <Button
               size="small"
               variant="tertiary"
-              icon={<Icon icon="zi-star" className="icon-warning" />}
-              className="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 border border-yellow-200 transition-all duration-200 btn-hover-lift focus-ring"
-            />
+              icon={<Icon icon="zi-star" className="text-yellow-600" />}
+              className="bg-gradient-to-r from-yellow-50 to-orange-50 text-yellow-700 hover:from-yellow-100 hover:to-orange-100 border border-yellow-200 hover:border-yellow-300 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 rounded-xl px-4"
+            >
+              Yêu thích
+            </Button>
           </Box>
         </Box>
       </Box>
@@ -143,18 +214,28 @@ function StoreDetailPage() {
               </Box>
 
               {/* Machine Selection */}
-              <Box flex className="space-x-3 mb-6">
-                <Button 
-                  variant="secondary"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              <Box flex className="space-x-2 mb-4">
+                <Button
+                  variant={selectedMachineType === 'washing' ? 'primary' : 'tertiary'}
+                  className={`flex-1 font-medium py-2.5 rounded-lg transition-colors duration-200 ${
+                    selectedMachineType === 'washing'
+                      ? 'bg-blue-500 text-white'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedMachineType('washing')}
                 >
-                  Máy giặt
+                  Máy giặt ({selectedStore.washingMachines.filter(m => m.status === 'available').length})
                 </Button>
-                <Button 
-                  variant="tertiary"
-                  className="flex-1 border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-semibold"
+                <Button
+                  variant={selectedMachineType === 'drying' ? 'primary' : 'tertiary'}
+                  className={`flex-1 font-medium py-2.5 rounded-lg transition-colors duration-200 ${
+                    selectedMachineType === 'drying'
+                      ? 'bg-purple-500 text-white'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedMachineType('drying')}
                 >
-                  Máy sấy
+                  Máy sấy ({selectedStore.dryingMachines.filter(m => m.status === 'available').length})
                 </Button>
               </Box>
 
@@ -179,9 +260,11 @@ function StoreDetailPage() {
 
               {/* Available Machines */}
               <Box>
-                <Text.Title size="small" className="mb-3">Máy có sẵn</Text.Title>
+                <Text.Title size="small" className="mb-3">
+                  {selectedMachineType === 'washing' ? 'Máy giặt có sẵn' : 'Máy sấy có sẵn'}
+                </Text.Title>
                 <Box className="space-y-3">
-                  {selectedStore.washingMachines
+                  {(selectedMachineType === 'washing' ? selectedStore.washingMachines : selectedStore.dryingMachines)
                     .filter(machine => machine.status === 'available')
                     .map((machine) => (
                       <MachineCard
@@ -191,6 +274,20 @@ function StoreDetailPage() {
                       />
                     ))}
                 </Box>
+                
+                {/* Empty state for no available machines */}
+                {(selectedMachineType === 'washing' ? selectedStore.washingMachines : selectedStore.dryingMachines)
+                  .filter(machine => machine.status === 'available').length === 0 && (
+                  <Box className="text-center py-8 bg-gray-50 rounded-xl">
+                    <Text className="text-3xl mb-2">😔</Text>
+                    <Text className="text-gray-600 font-medium">
+                      Tất cả máy {selectedMachineType === 'washing' ? 'giặt' : 'sấy'} đang bận
+                    </Text>
+                    <Text size="small" className="text-gray-500 mt-1">
+                      Thử chọn loại máy khác hoặc quay lại sau
+                    </Text>
+                  </Box>
+                )}
               </Box>
             </Box>
           </Tabs.Tab>
@@ -231,12 +328,12 @@ function StoreDetailPage() {
       </Box>
 
       {/* Start Button */}
-      <Box className="p-4 bg-gradient-to-r from-white to-blue-50 border-t border-gray-200">
+      <Box className="p-4 bg-white border-t border-gray-100">
         <Button
           fullWidth
           variant="primary"
           size="large"
-          className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-lg py-4 hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 rounded-xl transition-colors duration-200"
         >
           Bắt đầu sử dụng
         </Button>

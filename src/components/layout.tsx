@@ -10,7 +10,7 @@ import {
 import { AppProps } from "zmp-ui/app";
 
 import HomePage from "@/pages/index";
-import MapPage from "@/pages/map";
+import MapPage from "@/pages/map-new";
 import StoreDetailPage from "@/pages/store-detail";
 import MachineMonitoringPage from "@/pages/machine-monitoring";
 import AppHeader from "@/components/app-header";
@@ -19,11 +19,15 @@ import AppBottomNavigation from "./bottom-navigation";
 import PermissionHandler from "./permission-handler";
 import QRScanner from "./qr-scanner";
 import MachineActivation from "./machine-activation";
+import Onboarding from "./onboarding";
+import SplashScreen from "./splash-screen";
 import { useAtom } from "jotai";
-import { activeTabAtom, selectedMachineAtom, selectedStoreAtom, reservationsAtom, qrScanRequestAtom } from "@/store/atoms";
+import { activeTabAtom, selectedMachineAtom, selectedStoreAtom, reservationsAtom, qrScanRequestAtom, hasCompletedOnboardingAtom, appInitializedAtom } from "@/store/atoms";
 
 const Layout = () => {
   const [activeTab, setActiveTab] = useAtom(activeTabAtom);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useAtom(hasCompletedOnboardingAtom);
+  const [appInitialized, setAppInitialized] = useAtom(appInitializedAtom);
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showMachineActivation, setShowMachineActivation] = useState(false);
@@ -32,6 +36,19 @@ const Layout = () => {
   const [, setSelectedStore] = useAtom(selectedStoreAtom);
   const [, setReservations] = useAtom(reservationsAtom);
   const [qrScanRequest, setQrScanRequest] = useAtom(qrScanRequestAtom);
+
+  // Initialize app after splash screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppInitialized(true);
+    }, 2000); // Show splash for 2 seconds
+
+    return () => clearTimeout(timer);
+  }, [setAppInitialized]);
+
+  const handleOnboardingComplete = () => {
+    setHasCompletedOnboarding(true);
+  };
 
   const handleQRScan = () => {
     setShowQRScanner(true);
@@ -112,6 +129,21 @@ const Layout = () => {
     setActiveTab('monitor');
   };
 
+  const handleTabChange = (tab: string) => {
+    const newTab = tab as "home" | "map" | "machines" | "profile" | "monitor";
+    setActiveTab(newTab);
+    
+    // Clear selected store when navigating away from machines tab
+    if (newTab !== 'machines' && newTab !== 'monitor') {
+      setSelectedStore(null);
+    }
+    
+    // Clear selected machine when navigating away from monitor tab
+    if (newTab !== 'monitor') {
+      setSelectedMachine(null);
+    }
+  };
+
   const renderCurrentPage = () => {
     switch (activeTab) {
       case 'home':
@@ -129,31 +161,67 @@ const Layout = () => {
     }
   };
 
+  // Show splash screen first
+  if (!appInitialized) {
+    return <SplashScreen onComplete={() => setAppInitialized(true)} />;
+  }
+
+  // Show onboarding if not completed
+  if (!hasCompletedOnboarding) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
   return (
     <App theme={getSystemInfo().zaloTheme as AppProps["theme"]}>
       <ZMPRouter>
-        <div className="app-layout min-h-screen bg-gray-50">
-          <div className="content-safe-area">
-            {renderCurrentPage()}
+        <div className="app-layout min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+          {/* Enhanced Background Pattern */}
+          <div
+            className="absolute inset-0 opacity-5 pointer-events-none"
+            style={{
+              backgroundImage: `url('data:image/svg+xml,${encodeURIComponent(`
+                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="app-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                      <circle cx="50" cy="50" r="2" fill="#3b82f6" opacity="0.3"/>
+                      <circle cx="25" cy="25" r="1" fill="#8b5cf6" opacity="0.2"/>
+                      <circle cx="75" cy="75" r="1" fill="#6366f1" opacity="0.2"/>
+                      <circle cx="25" cy="75" r="1.5" fill="#10b981" opacity="0.15"/>
+                      <circle cx="75" cy="25" r="1.5" fill="#f59e0b" opacity="0.15"/>
+                    </pattern>
+                  </defs>
+                  <rect width="400" height="400" fill="url(#app-pattern)"/>
+                </svg>
+              `)}')`
+            }}
+          />
+          
+          {/* Page Content with Enhanced Transitions */}
+          <div className="content-safe-area relative z-10">
+            <div className="page-transition-container">
+              {renderCurrentPage()}
+            </div>
           </div>
-          <AppBottomNavigation 
+          
+          {/* Enhanced Bottom Navigation */}
+          <AppBottomNavigation
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
           />
           
           {/* Permission Handler - only shows when needed */}
-          <PermissionHandler 
+          <PermissionHandler
             onPermissionsGranted={() => setPermissionsGranted(true)}
           />
 
-          {/* QR Scanner Modal */}
+          {/* Enhanced QR Scanner Modal */}
           <QRScanner
             visible={showQRScanner}
             onClose={() => setShowQRScanner(false)}
             onScanned={handleQRScanned}
           />
 
-          {/* Machine Activation Modal */}
+          {/* Enhanced Machine Activation Modal */}
           <MachineActivation
             visible={showMachineActivation}
             machineData={scannedMachineData}

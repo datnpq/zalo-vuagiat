@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Text, Icon, Modal, Input, Select } from 'zmp-ui';
+import { useToast, ToastMessages } from './toast';
 
 interface WalletTopupProps {
   visible: boolean;
@@ -18,6 +19,7 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
   const [customAmount, setCustomAmount] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('zalopay');
   const [loading, setLoading] = useState(false);
+  const { showSuccess, showError, showInfo, ToastContainer } = useToast();
 
   const predefinedAmounts = [
     { value: 50000, label: '50K' },
@@ -66,11 +68,12 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
 
   const handleTopup = async () => {
     if (selectedAmount < 10000) {
-      alert('Số tiền nạp tối thiểu là 10,000đ');
+      showError('Số tiền nạp tối thiểu là 10,000đ nha! 💰');
       return;
     }
 
     setLoading(true);
+    showInfo('Đang xử lý thanh toán... Đợi tí nha! 💳');
     
     // Calculate bonus
     let bonusAmount = 0;
@@ -80,15 +83,20 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
     
     const totalAmount = selectedAmount + bonusAmount;
     
-    // Simulate API call
+    // Simulate API call with realistic steps
     setTimeout(() => {
-      onTopup(selectedAmount, paymentMethod, bonusAmount);
-      setLoading(false);
+      showInfo('Đang xác nhận giao dịch... ✅');
       
-      // Reset form
-      setSelectedAmount(0);
-      setCustomAmount('');
-      setPaymentMethod('zalopay');
+      setTimeout(() => {
+        onTopup(selectedAmount, paymentMethod, bonusAmount);
+        showSuccess(ToastMessages.success.topupSuccess);
+        setLoading(false);
+        
+        // Reset form
+        setSelectedAmount(0);
+        setCustomAmount('');
+        setPaymentMethod('zalopay');
+      }, 1000);
     }, 2000);
   };
 
@@ -105,25 +113,29 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      onClose={onClose}
-      verticalActions
-      title="Nạp tiền vào ví"
-      actions={[
-        {
-          text: 'Hủy',
-          close: true,
-        },
-        {
-          text: loading ? 'Đang xử lý...' : `Nạp ${getTotalAmount().toLocaleString()}đ${getBonusAmount() > 0 ? ` (+ ${getBonusAmount().toLocaleString()}đ thưởng)` : ''}`,
-          highLight: true,
-          onClick: handleTopup,
-          disabled: loading || selectedAmount < 10000,
-        },
-      ]}
-    >
-      <Box className="p-4">
+    <>
+      <ToastContainer />
+      <Modal
+        visible={visible}
+        onClose={onClose}
+        verticalActions
+        title="Nạp tiền vào ví"
+        className="modal-enhanced"
+        actions={[
+          {
+            text: 'Hủy',
+            close: true,
+            disabled: loading,
+          },
+          {
+            text: loading ? 'Đang xử lý...' : `Nạp ${getTotalAmount().toLocaleString()}đ${getBonusAmount() > 0 ? ` (+ ${getBonusAmount().toLocaleString()}đ thưởng)` : ''}`,
+            highLight: true,
+            onClick: handleTopup,
+            disabled: loading || selectedAmount < 10000,
+          },
+        ]}
+      >
+        <Box className="p-4">
         {/* Promotion Banner */}
         <Box className="bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl p-4 mb-6 text-white">
           <Box className="flex items-center mb-2">
@@ -292,6 +304,7 @@ const WalletTopup: React.FC<WalletTopupProps> = ({
         )}
       </Box>
     </Modal>
+    </>
   );
 };
 

@@ -6,6 +6,7 @@ import StoreCard from '@/components/store-card';
 import MachineIcon from '@/components/machine-icon';
 import QRScanner from '@/components/qr-scanner';
 import MachineActivation from '@/components/machine-activation';
+import WalletTopup from '@/components/wallet-topup';
 import { useToast, ToastMessages } from '@/components/toast';
 import EmptyState from '@/components/empty-state';
 import { 
@@ -33,6 +34,7 @@ function HomePage({}: HomePageProps = {}) {
   const { showSuccess, showError, ToastContainer } = useToast();
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showMachineActivation, setShowMachineActivation] = useState(false);
+  const [showTopupModal, setShowTopupModal] = useState(false);
   const [scannedMachineData, setScannedMachineData] = useState<any>(null);
 
   const handleStoreSelect = (store: any) => {
@@ -48,14 +50,15 @@ function HomePage({}: HomePageProps = {}) {
       // Set machine data and show activation modal
       setScannedMachineData(machineData);
       setShowMachineActivation(true);
+      setShowQRScanner(false);
+      showSuccess(ToastMessages.success.machineFound);
     } catch (error) {
       console.error('Invalid QR data:', error);
-      showError(ToastMessages.error.machineUnavailable);
+      showError(ToastMessages.error.qrInvalid);
     }
   };
 
   const handleMachineActivated = (machineId: string, paymentMethod: string) => {
-    showSuccess(ToastMessages.success.reservation);
     if (scannedMachineData) {
       setSelectedMachine({
         id: scannedMachineData.machineId,
@@ -91,12 +94,17 @@ function HomePage({}: HomePageProps = {}) {
     setActiveTab('monitor');
   };
 
+  const handleTopup = (amount: number, method: string, bonusAmount: number = 0) => {
+    // This will be handled by the wallet topup component
+    setShowTopupModal(false);
+  };
+
   const favoriteStore = laundryStores.find(store => store.id === 'store1');
 
   return (
-    <Page className="min-h-screen bg-gray-50">
+    <Page className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {/* Zalo Mini App Safe Area - đảm bảo không bị che header */}
-      <Box className="safe-area-top bg-white" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }} />
+      <Box className="safe-area-top bg-transparent" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }} />
       
       <AppHeader />
       
@@ -104,151 +112,171 @@ function HomePage({}: HomePageProps = {}) {
       <Box className="px-4 pt-6" style={{ paddingBottom: 'max(7rem, calc(120px + env(safe-area-inset-bottom, 24px)))' }}>
         {/* Clean Search Bar */}
         <Box className="mb-6">
-          <Box 
+          <Box
             className="bg-white rounded-2xl shadow-sm border border-gray-100 cursor-pointer transition-all duration-200 hover:shadow-md"
             onClick={() => setActiveTab('map')}
           >
             <Box className="flex items-center px-4 py-4">
-              <Icon icon="zi-search" className="icon-secondary mr-3 icon-lg" />
+              <Box className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center mr-3">
+                <Icon icon="zi-search" className="text-white" size={18} />
+              </Box>
               <Box className="flex-1">
-                <Text size="normal" className="text-gray-500">
+                <Text className="text-gray-600 font-medium">
                   Tìm tiệm giặt gần bạn...
                 </Text>
+                <Text size="small" className="text-gray-400 mt-0.5">
+                  Khám phá các tiệm xung quanh
+                </Text>
               </Box>
-              <Icon icon="zi-chevron-right" className="icon-secondary ml-2 icon-sm" />
+              <Icon icon="zi-chevron-right" className="text-gray-400" />
             </Box>
-          </Box>
-          
-          {/* Search suggestion hint */}
-          <Box className="flex items-center justify-center mt-3">
-            <Text size="xSmall" className="text-gray-500 text-center">
-              📍 Bấm để xem bản đồ tiệm gần bạn
-            </Text>
           </Box>
         </Box>
 
-        {/* Wallet Section - Prominent Money Display */}
+        {/* Clean Wallet Section */}
         <Box className="mb-6">
-          <Box className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-            {/* Background decoration */}
-            <Box 
-              className="absolute top-0 right-0 w-32 h-32 opacity-10"
-              style={{
-                background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                transform: 'translate(50%, -50%)'
-              }}
-            />
-            
-            <Box className="relative z-10">
-              {/* Header */}
-              <Box className="flex items-center justify-between mb-4">
-                <Box className="flex items-center space-x-2">
-                  <Box className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <Icon icon="zi-user" className="text-white text-lg" />
-                  </Box>
-                  <div className="text-white/90 font-medium">Ví của bạn</div>
+          <Box className="bg-blue-500 rounded-2xl p-5 shadow-sm">
+            <Box className="flex items-center justify-between mb-4">
+              <Box className="flex items-center gap-3">
+                <Box className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Text className="text-white text-lg">💰</Text>
                 </Box>
-                <div className="text-xs text-white/70 bg-white/10 px-2 py-1 rounded-full">
-                  VND
-                </div>
+                <Box>
+                  <Text className="text-white font-semibold">Ví GiGi</Text>
+                  <Text className="text-white/80 text-sm">của {user.name || 'bạn'}</Text>
+                </Box>
               </Box>
-
-              {/* Balance Display */}
-              <Box className="mb-4">
-                <div className="text-xs text-white/80 mb-1">Số dư chính</div>
-                <div className="text-3xl font-bold text-white mb-2">
-                  {user.balance?.toLocaleString('vi-VN') || '0'}₫
-                </div>
-                
-                {/* Bonus Balance */}
-                {user.bonusBalance && user.bonusBalance > 0 && (
-                  <Box className="flex items-center space-x-2">
-                    <Box className="bg-yellow-400/20 px-3 py-1 rounded-full flex items-center space-x-1">
-                      <Icon icon="zi-star" className="text-yellow-300 text-sm" />
-                      <div className="text-yellow-100 text-sm font-medium">
-                        +{user.bonusBalance.toLocaleString('vi-VN')}₫ thưởng
-                      </div>
-                    </Box>
-                  </Box>
-                )}
+              <Box className="text-xs text-white/90 bg-white/20 px-3 py-1 rounded-full font-medium">
+                VND
               </Box>
+            </Box>
 
-              {/* Top-up Button */}
+            <Box className="mb-4">
+              <Text className="text-white/90 text-sm mb-2">Số dư khả dụng</Text>
+              <Text className="text-3xl font-bold text-white mb-2">
+                {user.balance?.toLocaleString('vi-VN') || '0'}₫
+              </Text>
+              
+              {user.bonusBalance && user.bonusBalance > 0 && (
+                <Box className="bg-white/20 px-3 py-1 rounded-full inline-flex items-center gap-1">
+                  <Icon icon="zi-star" className="text-yellow-300 text-sm" />
+                  <Text className="text-yellow-100 text-sm font-medium">
+                    +{user.bonusBalance.toLocaleString('vi-VN')}₫ thưởng
+                  </Text>
+                </Box>
+              )}
+            </Box>
+
+            <Box flex className="gap-2">
               <Button
-                className="w-full bg-white/15 backdrop-blur-sm border border-white/20 text-white font-medium py-3 rounded-xl hover:bg-white/20 transition-all duration-200"
-                onClick={() => {/* Handle top-up */}}
+                className="flex-1 bg-white/20 border border-white/30 text-white font-medium py-3 rounded-xl hover:bg-white/30 transition-colors duration-200"
+                onClick={() => setShowTopupModal(true)}
               >
-                <Box className="flex items-center justify-center space-x-2">
-                  <Icon icon="zi-plus-circle" className="text-lg" />
-                  <span>Nạp tiền</span>
-                </Box>
+                <Icon icon="zi-plus-circle" className="mr-2" />
+                Nạp tiền
+              </Button>
+              <Button
+                className="bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors duration-200 px-4 rounded-xl"
+                onClick={() => setActiveTab('profile')}
+              >
+                <Icon icon="zi-clock-1" />
               </Button>
             </Box>
           </Box>
         </Box>
 
-        {/* Empty state when no active machine */}
+        {/* Enhanced Empty state when no active machine */}
         {activeReservations.length === 0 && (
-          <EmptyState
-            type="no-reservations"
-            title="Chưa có máy nào đang chạy"
-            subtitle="Quét QR tại tiệm để bắt đầu"
-            actionText="Quét QR"
-            onAction={() => setShowQRScanner(true)}
-            className="py-6"
-          />
-        )}
-
-        {/* Nearby Stores */}
-        <Box className="mb-6">
-          <Box className="flex items-center justify-between mb-4">
-            <Text.Title size="small" className="font-bold text-gray-900">
-              Tiệm giặt gần đây ({laundryStores.length})
-            </Text.Title>
-            <Button
-              size="small"
-              variant="tertiary"
-              className="text-blue-600 p-1"
-              onClick={() => setActiveTab('map')}
-            >
-              <Icon icon="zi-plus" className="icon-primary icon-sm mr-1" />
-              <Text size="xSmall" className="font-medium">Thêm</Text>
-            </Button>
-          </Box>
-          
-          <Box className="space-y-4">
-            {laundryStores.slice(0, 2).map((store) => (
-              <StoreCard
-                key={store.id}
-                store={store}
-                onSelect={() => handleStoreSelect(store)}
-              />
-            ))}
-          </Box>
-        </Box>
-
-        {/* Favorite Store */}
-        {favoriteStore && (
-          <Box className="mb-6">
-            <Text.Title size="small" className="mb-4 font-bold text-gray-900">
-              Tiệm quen thuộc (1)
-            </Text.Title>
-            
-            <StoreCard 
-              store={favoriteStore}
-              onSelect={() => handleStoreSelect(favoriteStore)}
+          <Box className="mb-8">
+            <EmptyState
+              type="no-reservations"
+              title="Chưa có máy nào đang chạy"
+              subtitle="Quét QR tại tiệm để bắt đầu giặt ủi nha"
+              actionText="Quét QR ngay"
+              onAction={() => setShowQRScanner(true)}
+              className="py-8 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg"
             />
           </Box>
         )}
 
-        {/* Floating QR FAB */}
-        <Box className="fixed bottom-24 right-4 z-50">
+        {/* Enhanced Nearby Stores Section */}
+        <Box className="mb-8">
+          <Box className="flex items-center justify-between mb-5 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-white/50">
+            <Box flex className="items-center gap-3">
+              <Box className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+                <Text className="text-white font-bold text-sm">🏪</Text>
+              </Box>
+              <Box>
+                <Text.Title size="small" className="font-bold text-gray-900">
+                  Tiệm giặt gần đây
+                </Text.Title>
+                <Text size="xSmall" className="text-gray-600 font-medium">
+                  {laundryStores.length} tiệm đang hoạt động
+                </Text>
+              </Box>
+            </Box>
+            <Button
+              size="small"
+              variant="tertiary"
+              className="bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 transition-all duration-300 hover:scale-105 shadow-sm"
+              onClick={() => setActiveTab('map')}
+            >
+              <Icon icon="zi-plus" className="mr-1" size={14} />
+              <Text size="xSmall" className="font-semibold">Xem thêm</Text>
+            </Button>
+          </Box>
+          
+          <Box className="space-y-4">
+            {laundryStores.slice(0, 2).map((store, index) => (
+              <Box
+                key={store.id}
+                style={{ animationDelay: `${index * 200}ms` }}
+                className="animate-fadeInUp"
+              >
+                <StoreCard
+                  store={store}
+                  onSelect={() => handleStoreSelect(store)}
+                />
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Enhanced Favorite Store */}
+        {favoriteStore && (
+          <Box className="mb-8">
+            <Box className="flex items-center gap-3 mb-5 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+              <Box className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-md">
+                <Text className="text-white font-bold text-sm">⭐</Text>
+              </Box>
+              <Box>
+                <Text.Title size="small" className="font-bold text-gray-900">
+                  Tiệm quen thuộc
+                </Text.Title>
+                <Text size="xSmall" className="text-gray-600 font-medium">
+                  Tiệm bạn hay đến nhất
+                </Text>
+              </Box>
+            </Box>
+            
+            <StoreCard
+              store={favoriteStore}
+              onSelect={() => handleStoreSelect(favoriteStore)}
+              className="border-2 border-purple-200 shadow-lg"
+            />
+          </Box>
+        )}
+
+        {/* Clean Floating QR FAB */}
+        <Box className="fixed bottom-28 right-4 z-50">
           <Button
-            round
-            className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+            className="w-14 h-14 bg-blue-500 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 rounded-2xl"
             icon={<Icon icon="zi-qrline" className="text-xl" />}
             onClick={() => setShowQRScanner(true)}
           />
+          <Box className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded shadow-sm">
+            <Text size="xxSmall" className="font-medium text-gray-700">Quét QR</Text>
+          </Box>
         </Box>
         
       </Box>
@@ -272,6 +300,14 @@ function HomePage({}: HomePageProps = {}) {
           setScannedMachineData(null);
         }}
         onActivated={handleMachineActivated}
+      />
+
+      {/* Wallet Topup Modal */}
+      <WalletTopup
+        visible={showTopupModal}
+        onClose={() => setShowTopupModal(false)}
+        onTopup={handleTopup}
+        currentBalance={user.balance || 0}
       />
     </Page>
   );

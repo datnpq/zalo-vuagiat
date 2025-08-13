@@ -31,7 +31,7 @@ function ProfilePage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showReservationsModal, setShowReservationsModal] = useState(false);
   const [showTopupModal, setShowTopupModal] = useState(false);
-  const { showSuccess, showError, ToastContainer } = useToast();
+  const { showSuccess, showError, showInfo, ToastContainer } = useToast();
 
   // Mock transaction history
   const transactionHistory = [
@@ -164,84 +164,160 @@ function ProfilePage() {
   const handleTopup = (amount: number, method: string, bonusAmount: number = 0) => {
     const totalAmount = amount + bonusAmount;
     
-    // Update user balance
+    // Update user balance and stats
     setUser({
       ...user,
       balance: (user.balance || 0) + totalAmount,
       bonusBalance: bonusAmount > 0 ? (user.bonusBalance || 0) + bonusAmount : (user.bonusBalance || 0),
-      bonusExpiry: bonusAmount > 0 ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : user.bonusExpiry // 30 days from now
+      bonusExpiry: bonusAmount > 0 ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : user.bonusExpiry, // 30 days from now
+      loyaltyPoints: (user.loyaltyPoints || 0) + Math.floor(amount / 10000) // 1 point per 10k VND
     });
 
     setShowTopupModal(false);
-    showSuccess(ToastMessages.success.payment);
+    showSuccess(ToastMessages.success.topupSuccess);
+  };
+
+  const handleShareApp = async () => {
+    showInfo(ToastMessages.info.loading);
+    try {
+      await handleShare();
+      showSuccess('Chia sẻ thành công! Cảm ơn bạn! 🎉');
+    } catch (error) {
+      showError('Không thể chia sẻ! Thử lại sau nha 😔');
+    }
+  };
+
+  const handleContactSupport = async () => {
+    showInfo(ToastMessages.info.callConnecting);
+    try {
+      await handleSupport();
+      showSuccess('Đã kết nối với hỗ trợ! 💬');
+    } catch (error) {
+      showError('Không thể kết nối! Thử lại sau nha 📞');
+    }
   };
 
   return (
-    <Page className="bg-gray-50 min-h-screen">
+    <Page className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       <ToastContainer />
       {/* Safe Area */}
-      <Box className="safe-area-top bg-white" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }} />
+      <Box className="safe-area-top bg-transparent" style={{ paddingTop: 'env(safe-area-inset-top, 8px)' }} />
       
       <AppHeader title="Tài khoản" />
       
       {/* Content với safe area */}
       <Box className="pb-safe-bottom" style={{ paddingBottom: 'max(6rem, env(safe-area-inset-bottom, 24px))' }}>
         
-        {/* User Profile Section */}
-        <Box className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 mx-4 mt-4 rounded-2xl shadow-lg">
+        {/* Enhanced User Profile Section */}
+        <Box className="bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 text-white p-6 mx-4 mt-4 rounded-3xl shadow-2xl relative overflow-hidden border border-purple-400/30">
+          {/* Enhanced Background Effects */}
+          <Box className="absolute inset-0 opacity-20">
+            <Box
+              className="absolute top-0 right-0 w-32 h-32 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%)',
+                transform: 'translate(20px, -20px)'
+              }}
+            />
+            <Box
+              className="absolute bottom-0 left-0 w-24 h-24 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%)',
+                transform: 'translate(-10px, 10px)'
+              }}
+            />
+          </Box>
+          
           {isLoggedIn && zaloUser ? (
-            <Box flex className="items-center space-x-4">
-              <Avatar
-                size={64}
-                src={zaloUser.avatar}
-                online
-              />
-              <Box className="flex-1">
-                <Text.Title className="text-white font-bold mb-1">
-                  {zaloUser.name}
-                </Text.Title>
-                <Text className="text-white/90 mb-2">
-                  {zaloUser.phone || user.phone}
-                </Text>
-                <Box className="flex items-center space-x-2">
-                  <Box className="bg-white/20 px-3 py-1 rounded-full">
-                    <Text size="small" className="text-white font-medium">
-                      {user.balance?.toLocaleString('vi-VN')}₫
+            <Box className="relative z-10">
+              <Box flex className="items-center gap-4 mb-6">
+                <Box className="relative">
+                  <Avatar
+                    size={80}
+                    src={zaloUser.avatar}
+                    online
+                    className="border-4 border-white/30 shadow-xl"
+                  />
+                  <Box className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                    <Text className="text-white font-bold text-xs">✓</Text>
+                  </Box>
+                </Box>
+                <Box className="flex-1">
+                  <Text.Title className="text-white font-bold mb-2 text-xl">
+                    {zaloUser.name}
+                  </Text.Title>
+                  <Box flex className="items-center gap-2 mb-3">
+                    <Icon icon="zi-call" className="text-white/80" size={16} />
+                    <Text className="text-white/90 font-medium">
+                      {zaloUser.phone || user.phone}
                     </Text>
                   </Box>
-                  {user.bonusBalance && user.bonusBalance > 0 && (
-                    <Box className="bg-orange-400/30 px-3 py-1 rounded-full">
-                      <Text size="xSmall" className="text-white font-medium">
-                        🎁 +{user.bonusBalance.toLocaleString('vi-VN')}₫
-                      </Text>
+                  <Box flex className="items-center gap-2">
+                    <Box className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+                    <Text size="small" className="text-white/80 font-medium">
+                      Đã xác thực Zalo
+                    </Text>
+                  </Box>
+                </Box>
+              </Box>
+              
+              {/* Enhanced Balance Display */}
+              <Box className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30 mb-4">
+                <Box flex className="items-center justify-between mb-3">
+                  <Box flex className="items-center gap-2">
+                    <Box className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Text className="text-white font-bold">💰</Text>
                     </Box>
-                  )}
-                  <Button 
-                    size="small" 
-                    className="bg-white/20 text-white border-white/30"
+                    <Text className="text-white/90 font-semibold">Số dư ví</Text>
+                  </Box>
+                  <Button
+                    size="small"
+                    className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-300 rounded-xl"
                     onClick={() => setShowTopupModal(true)}
                   >
+                    <Icon icon="zi-plus" className="mr-1" />
                     Nạp tiền
                   </Button>
                 </Box>
+                
+                <Text className="text-3xl font-bold text-white mb-2">
+                  {user.balance?.toLocaleString('vi-VN')}₫
+                </Text>
+                
+                {user.bonusBalance && user.bonusBalance > 0 && (
+                  <Box flex className="items-center gap-2">
+                    <Box className="bg-gradient-to-r from-yellow-400/30 to-orange-400/30 backdrop-blur-sm px-3 py-1 rounded-full border border-yellow-300/40">
+                      <Text size="xSmall" className="text-yellow-100 font-bold">
+                        🎁 +{user.bonusBalance.toLocaleString('vi-VN')}₫ thưởng
+                      </Text>
+                    </Box>
+                  </Box>
+                )}
               </Box>
             </Box>
           ) : (
-            <Box className="text-center py-4">
+            <Box className="text-center py-8 relative z-10">
               {isLoading ? (
                 <Box>
-                  <Icon icon="zi-more-horiz" className="text-white text-2xl mb-2 animate-pulse" />
-                  <Text className="text-white">Đang đăng nhập...</Text>
+                  <Box className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                    <Icon icon="zi-more-horiz" className="text-white text-2xl animate-pulse" />
+                  </Box>
+                  <Text className="text-white font-semibold text-lg">Đang đăng nhập...</Text>
+                  <Text className="text-white/80 text-sm mt-1">Kết nối với Zalo</Text>
                 </Box>
               ) : (
                 <Box>
-                  <Icon icon="zi-user-circle" className="text-white text-4xl mb-3" />
-                  <Text.Title className="text-white mb-2">Chưa đăng nhập</Text.Title>
-                  <Button 
-                    variant="secondary" 
+                  <Box className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-lg">
+                    <Icon icon="zi-user-circle" className="text-white text-4xl" />
+                  </Box>
+                  <Text.Title className="text-white mb-3 text-xl">Chưa đăng nhập</Text.Title>
+                  <Text className="text-white/80 mb-4">Đăng nhập để sử dụng đầy đủ tính năng</Text>
+                  <Button
+                    variant="secondary"
                     onClick={loginWithZalo}
-                    className="bg-white text-purple-600 font-semibold"
+                    className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                   >
+                    <Icon icon="zi-user" className="mr-2" />
                     Đăng nhập bằng Zalo
                   </Button>
                 </Box>
@@ -250,26 +326,36 @@ function ProfilePage() {
           )}
         </Box>
 
-        {/* Quick Stats */}
-        <Box className="mx-4 mt-4 bg-white rounded-2xl p-4 shadow-sm">
-          <Box className="grid grid-cols-3 gap-4">
-            <Box className="text-center">
-              <Text.Title className="text-purple-600 font-bold">
+        {/* Enhanced Quick Stats */}
+        <Box className="mx-4 mt-4 bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
+          <Text className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Text className="text-blue-500">📊</Text>
+            Thống kê của bạn
+          </Text>
+          <Box className="grid grid-cols-4 gap-3">
+            <Box className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+              <Text.Title className="text-purple-600 font-bold text-lg">
                 {activeReservations.length}
               </Text.Title>
-              <Text size="xSmall" className="text-gray-600">Đang giặt</Text>
+              <Text size="xSmall" className="text-purple-700 font-medium">Đang giặt</Text>
             </Box>
-            <Box className="text-center">
-              <Text.Title className="text-green-600 font-bold">
+            <Box className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+              <Text.Title className="text-green-600 font-bold text-lg">
                 {user.favoriteStores.length}
               </Text.Title>
-              <Text size="xSmall" className="text-gray-600">Tiệm quen</Text>
+              <Text size="xSmall" className="text-green-700 font-medium">Tiệm quen</Text>
             </Box>
-            <Box className="text-center">
-              <Text.Title className="text-blue-600 font-bold">
-                {transactionHistory.filter(t => t.type === 'payment').length}
+            <Box className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+              <Text.Title className="text-blue-600 font-bold text-lg">
+                {user.totalWashes || 0}
               </Text.Title>
-              <Text size="xSmall" className="text-gray-600">Đã giặt</Text>
+              <Text size="xSmall" className="text-blue-700 font-medium">Đã giặt</Text>
+            </Box>
+            <Box className="text-center p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+              <Text.Title className="text-orange-600 font-bold text-lg">
+                {user.loyaltyPoints || 0}
+              </Text.Title>
+              <Text size="xSmall" className="text-orange-700 font-medium">Điểm thưởng</Text>
             </Box>
           </Box>
         </Box>
@@ -320,14 +406,14 @@ function ProfilePage() {
               subTitle="Giới thiệu cho bạn bè"
               prefix={<Icon icon="zi-share" className="text-green-600" />}
               suffix={<Icon icon="zi-chevron-right" />}
-              onClick={handleShare}
+              onClick={handleShareApp}
             />
             <List.Item
               title="Hỗ trợ khách hàng"
               subTitle="Chat với team hỗ trợ"
               prefix={<Icon icon="zi-chat" className="text-purple-600" />}
               suffix={<Icon icon="zi-chevron-right" />}
-              onClick={handleSupport}
+              onClick={handleContactSupport}
             />
             <List.Item
               title="Cài đặt"
@@ -338,18 +424,39 @@ function ProfilePage() {
           </List>
         </Box>
 
-        {/* App Info */}
-        <Box className="mx-4 mt-4 bg-white rounded-2xl p-6 text-center shadow-sm">
-          <Icon icon="zi-star-solid" className="text-purple-600 text-2xl mb-2" />
-          <Text.Title size="small" className="font-bold text-gray-900 mb-1">
-            GiGi v1.0.0
-          </Text.Title>
-          <Text size="small" className="text-gray-500 mb-3">
-            Giặt gia công thông minh - Tiện lợi mọi lúc
-          </Text>
-          <Text size="xSmall" className="text-gray-400">
-            © 2024 GiGi Team. Made with ❤️ in Vietnam
-          </Text>
+        {/* Enhanced App Info */}
+        <Box className="mx-4 mt-6 mb-8">
+          <Box className="bg-gradient-to-r from-white to-blue-50 rounded-2xl p-6 text-center shadow-xl border border-blue-200">
+            <Box className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <Text className="text-white font-bold text-2xl">🚀</Text>
+            </Box>
+            <Text.Title size="small" className="font-bold text-gray-900 mb-2">
+              GiGi v1.0.0
+            </Text.Title>
+            <Text size="small" className="text-gray-600 mb-4 leading-relaxed">
+              Giặt gia công thông minh - Tiện lợi mọi lúc
+            </Text>
+            
+            {/* App Features */}
+            <Box className="grid grid-cols-2 gap-3 mb-4">
+              <Box className="p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <Text className="text-blue-600 font-bold text-sm">🎯 Thông minh</Text>
+              </Box>
+              <Box className="p-3 bg-green-50 rounded-xl border border-green-200">
+                <Text className="text-green-600 font-bold text-sm">⚡ Nhanh chóng</Text>
+              </Box>
+              <Box className="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                <Text className="text-purple-600 font-bold text-sm">💰 Tiết kiệm</Text>
+              </Box>
+              <Box className="p-3 bg-orange-50 rounded-xl border border-orange-200">
+                <Text className="text-orange-600 font-bold text-sm">🔒 An toàn</Text>
+              </Box>
+            </Box>
+            
+            <Text size="xSmall" className="text-gray-500">
+              © 2024 GiGi Team. Made with ❤️ in Vietnam
+            </Text>
+          </Box>
         </Box>
 
       </Box>

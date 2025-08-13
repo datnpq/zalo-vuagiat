@@ -82,34 +82,45 @@ const Toast: React.FC<ToastProps> = ({
   );
 };
 
-// Southern Vietnamese messages
-export const ToastMessages = {
+// Enhanced Southern Vietnamese messages
+const ToastMessages = {
   success: {
     reservation: 'Đặt máy thành công rồi nha! 🎉',
     payment: 'Thanh toán xong rồi đó! Vô giặt thôi! 💰',
     favorite: 'Đã thêm vào danh sách yêu thích! ❤️',
-    machineFound: 'Tìm thấy máy rồi! Mau mau đi giặt! 🔍'
+    machineFound: 'Tìm thấy máy rồi! Mau mau đi giặt! 🔍',
+    machineActivated: 'Máy đã bắt đầu chạy rồi nha! 🚀',
+    topupSuccess: 'Nạp tiền thành công! Giờ có thể giặt thoải mái! 💳',
+    storeAdded: 'Đã thêm tiệm vào danh sách yêu thích! ⭐'
   },
   error: {
     payment: 'Ối dời ơi! Thanh toán bị lỗi rồi 😔',
     network: 'Mạng bị lag rồi bạn ơi! Thử lại nha 📶',
     machineUnavailable: 'Máy này đang bận rồi nha! Tìm máy khác đi 😊',
-    location: 'Không tìm thấy vị trí! Bật GPS lên nha 📍'
+    location: 'Không tìm thấy vị trí! Bật GPS lên nha 📍',
+    insufficientBalance: 'Số dư không đủ rồi! Nạp thêm tiền đi nha 💸',
+    qrInvalid: 'Mã QR không đúng! Thử quét lại nha 📱',
+    machineError: 'Máy bị lỗi rồi! Báo nhân viên giúp nha 🔧'
   },
   warning: {
     lowBattery: 'Pin sắp hết rồi! Cắm sạc đi nha 🔋',
     timeRunningOut: 'Sắp hết giờ rồi! Mau đi nhận đồ! ⏰',
-    machineAlmostDone: 'Máy sắp xong rồi! Chuẩn bị nhận đồ nha 👕'
+    machineAlmostDone: 'Máy sắp xong rồi! Chuẩn bị nhận đồ nha 👕',
+    lowBalance: 'Số dư sắp hết rồi! Nạp thêm để tiếp tục nha 💰',
+    storeClosingSoon: 'Tiệm sắp đóng cửa rồi! Mau lên nha ⏰'
   },
   info: {
     searching: 'Đang tìm máy gần bạn nhất...',
     updating: 'Đang cập nhật thông tin...',
-    loading: 'Đợi tí nha, đang tải...'
+    loading: 'Đợi tí nha, đang tải...',
+    machineStarting: 'Máy đang khởi động... Chờ tí nha! ⚙️',
+    navigationStarted: 'Đang mở chỉ đường... 🗺️',
+    callConnecting: 'Đang kết nối cuộc gọi... 📞'
   }
 };
 
 // Hook for easy toast management
-export const useToast = () => {
+const useToast = () => {
   const [toasts, setToasts] = React.useState<Array<{
     id: string;
     message: string;
@@ -171,4 +182,5 @@ export const useToast = () => {
   };
 };
 
+export { useToast, ToastMessages };
 export default Toast;
